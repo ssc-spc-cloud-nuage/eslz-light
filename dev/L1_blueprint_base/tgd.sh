@@ -1,0 +1,1 @@
+terragrunt destroy -var-file=deploy.tfvars

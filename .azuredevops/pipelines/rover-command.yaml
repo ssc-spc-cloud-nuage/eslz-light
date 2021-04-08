@@ -1,0 +1,76 @@
+# PURPOSE:
+# Manual pipeline to run a terraform command a for a given environment and LN level folder.
+# Add your project environments and LN folders as parameters below and
+# create the pipeline from the "Pipelines > New pipeline" page.
+#
+# CHEATCODE:
+# Get your LN folders in yaml list format for the folder parameter:
+# ls . | egrep '^L[0-9]+_.*$' | awk '{print"  - "$1}'
+
+parameters:
+- name: environment
+  displayName: Environment
+  type: string
+  values:
+  - sandbox
+  - dev
+- name: folder
+  displayName: Level folder
+  type: string
+  values:
+  - L0_blueprint_launchpad
+  - L1_blueprint_base
+  - L2_blueprint_project 
+- name: terraform_command
+  displayName: Terraform command
+  type: string
+  values:
+  - plan
+  - apply
+  - destroy
+
+# Create a "Pipeline > Library > Variable group" named "AzureCLI" that includes the
+# ARM_CLIENT_ID, ARM_CLIENT_SECRET and ARM_TENANT_ID secrets  
+variables:
+- group: AzureCLI
+
+trigger: none
+
+stages:
+
+# Deploy commands ("apply" and "destroy") have a Plan stage to allow review of the change
+- ${{ if ne(parameters.terraform_command, 'plan') }}:
+  - stage: Plan_${{ parameters.terraform_command }}
+    displayName: Plan for ${{ parameters.terraform_command }}
+    jobs:
+    - template: ../templates/job-rover.yaml
+      parameters:
+        name: Rover_plan
+        displayName: ${{ parameters.folder }} rover ${{ parameters.environment }} plan    
+        steps:
+        - template: ../templates/steps-rover-setup.yaml
+        - bash: echo "CHANGES_LN=\"${{ parameters.folder }};\"" > .env_changes
+          displayName: Set folder ${{ parameters.folder }}
+        - bash: .azuredevops/scripts/rover.sh ${{ parameters.environment }} plan
+          name: GetPlanStatus
+          displayName: Rover ${{ parameters.environment }} plan
+
+- stage: Rover_${{ parameters.terraform_command }}
+  displayName: Rover ${{ parameters.terraform_command }}
+  condition: or(
+    eq('${{ parameters.terraform_command }}', 'plan'),
+    eq(stageDependencies.Plan_${{ parameters.terraform_command }}.outputs['Rover_plan.GetPlanStatus.DO_APPLY'], '1'))
+  jobs:
+  - template: ../templates/job-rover.yaml
+    parameters:
+      name: Rover_command
+      displayName: ${{ parameters.folder }} rover ${{ parameters.environment }} ${{ parameters.terraform_command }}
+      environment: ${{ parameters.environment }}
+      isDeploy: ${{ ne(parameters.terraform_command, 'plan') }}
+      steps:
+      - checkout: self
+      - template: ../templates/steps-rover-setup.yaml
+      - bash: echo "CHANGES_LN=\"${{ parameters.folder }};\"" > .env_changes
+        displayName: Set folder ${{ parameters.folder }}
+      - bash: .azuredevops/scripts/rover.sh ${{ parameters.environment }} ${{ parameters.terraform_command }}
+        displayName: Rover ${{ parameters.environment }} ${{ parameters.terraform_command }}

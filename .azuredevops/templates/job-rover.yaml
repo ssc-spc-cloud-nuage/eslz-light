@@ -1,0 +1,75 @@
+# PURPOSE:
+# Job template for running Rover commands.  If `isDeploy = True`, this will
+# create a deployment job that will trigger the environment's approval policies.
+
+parameters:
+- name: name
+  type: string
+  default: ''
+- name: displayName
+  type: string
+  default: ''
+- name: dependsOn
+  type: string
+  default: ''  
+- name: condition
+  type: string
+  default: ''
+- name: environment
+  type: string
+  default: ''
+- name: isDeploy
+  type: boolean
+  default: False
+- name: steps
+  type: stepList
+  default: []
+- name: vmImage
+  type: string
+  default: ubuntu-20.04
+- name: container
+  type: object
+  default:
+    image: sscspccloudnuage/rover:2103.2611
+    options: --user 0
+    env:
+      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+      ARM_TENANT_ID: $(ARM_TENANT_ID)
+      TF_DATA_DIR: /home/vsts_azpcontainer/.terraform.cache
+      TF_PLUGIN_CACHE_DIR: /home/vsts_azpcontainer/.terraform.cache/plugin-cache
+
+jobs:
+
+# Standard job
+- ${{ if eq(parameters.isDeploy, False) }}:
+
+  - job: ${{ parameters.name }}
+    displayName: ${{ parameters.displayName }}
+    ${{ if ne(parameters.dependsOn, '') }}:
+      dependsOn: ${{ parameters.dependsOn }}    
+    ${{ if ne(parameters.condition, '') }}:
+      condition: ${{ parameters.condition }}
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    container: ${{ parameters.container }}
+    steps: ${{ parameters.steps }}
+
+# Deployment job that updates an environment.
+# This will trigger the environment's approval policies.
+- ${{ if eq(parameters.isDeploy, True) }}:
+
+  - deployment: '${{ parameters.name }}'
+    displayName: '${{ parameters.displayName }}'
+    ${{ if ne(parameters.dependsOn, '') }}:
+      dependsOn: ${{ parameters.dependsOn }}      
+    ${{ if ne(parameters.condition, '') }}:
+      condition: ${{ parameters.condition }}  
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    container: ${{ parameters.container }}
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:       
+          steps: ${{ parameters.steps }}

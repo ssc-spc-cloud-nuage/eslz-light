@@ -1,0 +1,19 @@
+# PURPOSE:
+# Setup the expected Rover paths and perform an Azure CLI login.
+# The following secrets must exist:
+# - ARM_CLIENT_ID: User id of the service principal (SP)
+# - ARM_CLIENT_SECRET: Password for the SP
+# - ARM_TENANT_ID: Tenant ID of the infrastructure
+
+steps:
+- script: sudo ln -s $(Build.SourcesDirectory) /tf/caf
+  displayName: Setup expected paths
+- script: chmod +x .azuredevops/scripts/*.sh
+  displayName: Set execute on scripts
+- script: |
+    set -e
+    az login --service-principal \
+      -u $(ARM_CLIENT_ID) \
+      -p $(ARM_CLIENT_SECRET) \
+      --tenant $(ARM_TENANT_ID)
+  displayName: Service principal az login  

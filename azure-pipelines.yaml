@@ -1,0 +1,39 @@
+# PURPOSE:
+# Run rover plan/apply commands against a list of environments. Pipeline
+# will run on merges to `main`, and optionally, for PRs to `main`.
+#
+# Add environments in the order you want the rover commands run. Each 
+# environment needs a "Pipelines > Environment" where you can add approval
+# policies to pause the `rover apply` until changes are reviewed.
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environment
+parameters:
+- name: environments
+  type: object
+  default:
+  - sandbox
+  - dev
+
+# To project main from direct pushes, add a required Build Validation branch policy.
+# This will create PR pipelines that run against your first environment only.
+# https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - .devcontainer
+    - .gitattributes
+    - .gitignore
+    - .vscode
+    - README.md
+
+# Create a "Pipeline > Library > Variable group" named "AzureCLI" that includes the
+# ARM_CLIENT_ID, ARM_CLIENT_SECRET and ARM_TENANT_ID secrets
+variables:
+  - group: AzureCLI
+
+stages:
+- template: ./.azuredevops/templates/stages-plan-apply.yaml
+  parameters: 
+    environments: ${{ parameters.environments }}

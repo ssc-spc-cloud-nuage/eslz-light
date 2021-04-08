@@ -1,0 +1,105 @@
+# PURPOSE: 
+# Create a Rover stages for each environment parameter.  
+# Before starting, a Setup stage checks if there are any git changes
+# between the branch and the current state of the `main` branch.
+#
+# For each environment as ${ENV}:
+# - If git changes: `rover ${ENV} plan`
+# - If plan shows infrastructure changes: `rover ${ENV} apply`
+#
+# NOTE: 
+# For PR pipelines, only the first environment stages are created.
+
+parameters:
+- name: environments
+  type: object
+  default: {}
+
+stages:
+
+# Setup steps to run before the Terraform commands
+- stage: Setup
+  jobs:
+  - job: Setup
+    pool:
+      vmImage: ubuntu-20.04
+    steps:
+    - checkout: self
+      persistCredentials: true     
+    - script: chmod +x .azuredevops/scripts/*.sh
+      displayName: Set execute on scripts
+    - bash: .azuredevops/scripts/get-changes.sh "$(Build.SourceBranchName)" "$(Build.SourcesDirectory)"
+      displayName: Get env changes
+    - publish: $(Build.SourcesDirectory)/.env_changes
+      artifact: .env_changes
+      displayName: Save env changes
+
+# Create a plan/apply stage for each environment      
+- ${{ each env in parameters.environments }}:
+
+  # Check if this is a Pull Request (PR) pipeline.  If not, create plan/apply for all environments.
+  # If it's a PR, only create a plan/apply for the first environment
+  - ${{ if or(ne(variables['Build.Reason'], 'PullRequest'), eq(parameters.environments[0], env)) }}:
+
+    # Terraform Plan for any changed L{N} folders identified by the Setup stage
+    - stage: Plan_${{ env }}
+      displayName: Plan ${{ env }}
+      condition: always()
+      jobs:
+      - job: Changes_${{ env }}
+        displayName: Check changes ${{ env }}
+        pool:
+          vmImage: ubuntu-20.04
+        steps:
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            artifact: .env_changes
+            path: $(Build.SourcesDirectory)
+          displayName: Download env changes
+        - script: chmod +x .azuredevops/scripts/*.sh
+          displayName: Set execute on scripts               
+        - bash: .azuredevops/scripts/check-changes.sh ${{ env }} $(Build.SourcesDirectory)      
+          name: CheckChanges
+          displayName: Check for env changes
+
+      - template: ../templates/job-rover.yaml
+        parameters:
+          name: Plan_${{ env }}
+          displayName: Rover ${{ env }} plan
+          dependsOn: Changes_${{ env }}
+          condition: eq(dependencies.Changes_${{ env }}.outputs['CheckChanges.DO_PLAN'], '1')
+          steps:
+          - template: steps-rover-setup.yaml
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: .env_changes
+              path: $(Build.SourcesDirectory)
+            displayName: Download env changes
+          - bash: .azuredevops/scripts/rover.sh ${{ env }} plan
+            name: GetPlanStatus
+            displayName: Terraform plan ${{ env }}
+          - publish: $(Build.SourcesDirectory)/.env_plans_${{ env }}
+            artifact: .env_plans_${{ env }}
+            displayName: Save env plans
+
+    # Terraform Apply for any changed L{N} folders that also had infra changes in the Plan stage
+    - stage: Apply_${{ env }}
+      displayName: Apply ${{ env }}    
+      condition: eq(stageDependencies.Plan_${{ env }}.outputs['Plan_${{ env }}.GetPlanStatus.DO_APPLY'], '1')
+      jobs:
+      - template: ../templates/job-rover.yaml
+        parameters:
+          name: Apply_${{ env }}
+          displayName: Rover ${{ env }} apply
+          environment: ${{ env }}
+          isDeploy: True
+          steps:
+          - checkout: self
+          - template: steps-rover-setup.yaml
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: .env_plans_${{ env }}
+              path: $(Build.SourcesDirectory)
+            displayName: Download env plans
+          - bash: .azuredevops/scripts/rover.sh ${{ env }} apply
+            displayName: Terraform apply ${{ env }}
