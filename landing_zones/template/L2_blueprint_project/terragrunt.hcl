@@ -1,5 +1,5 @@
 locals {
-  rscfg  = yamldecode(file("../env.yaml"))
+  rscfg  = yamldecode(file("../remote_state.yaml"))
   config = yamldecode(file("../config.yaml"))
 }
 

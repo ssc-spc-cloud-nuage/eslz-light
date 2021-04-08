@@ -28,7 +28,12 @@ variable "windows_VMs" {
 
 # Variables for L1 remote state access
 
-variable "L1_terraform_remote_state_account_name" {}
-variable "L1_terraform_remote_state_container_name" {}
-variable "L1_terraform_remote_state_key" {}
-variable "L1_terraform_remote_state_resource_group_name" {}
+# variable "L1_terraform_remote_state_account_name" {}
+# variable "L1_terraform_remote_state_container_name" {}
+# variable "L1_terraform_remote_state_key" {}
+# variable "L1_terraform_remote_state_resource_group_name" {}
+
+# New method using terragrunt depandancy
+variable "L1_blueprint_base_outputs" {
+  type = any
+}
