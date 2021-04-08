@@ -1,7 +1,7 @@
 # You can use a tool like this to help convert hcl syntax structure to yaml: https://www.hcl2json.com/
 #
 common:
-  subscription_id: "75eea6e9-de40-430f-886f-21a5eb5f150d" # Subscription where the project is de ployed
+  subscription_id: "<Insert subscription ID>" # Subscription where the project is de ployed
   tags:
     branch: <branch name>
     classification: pbmm
@@ -10,7 +10,7 @@ common:
     costcentre: "566811"
     env: dev
     owner: <some email>; <some email>; etc
-  env: "ScFc"
+  env: "ScSc"
   group: "CIO"
   project: "ESLZ-light"
   location: "canadacentral"

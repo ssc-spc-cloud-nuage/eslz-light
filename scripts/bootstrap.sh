@@ -1,14 +1,5 @@
 set -e
 
-# Get environment name from deploy.tfvars file
-# BOOTSTRAP_SUBSCRIPTION_ID=$(grep subscription ../config.yaml | cut '-d:' "-f2" | sed 's/"//g' | sed 's/ //g')
-# TF_VAR_environment=`grep env ./deploy.tfvars | cut '-d=' "-f2" | sed 's/"//g' | sed 's/ //g'`
-# Environment name derived from parent folder one level up
-# TF_VAR_env_folder_name=$(basename `cd .. ; pwd`)
-
-# echo "INFO - Setting subscription to ${BOOTSTRAP_SUBSCRIPTION_ID}"
-# az account set -s ${BOOTSTRAP_SUBSCRIPTION_ID}
-
 if [[ ! -f "./backend.azurerm.tf" ]]; then
   terragrunt apply -var-file=deploy.tfvars
 
@@ -56,17 +47,7 @@ remote_state:
 
 EOF
     echo "INFO - Do not forget to check-in ../env.yaml to source code management"
-#
-#     echo "INFO - generating envvars file ../.envvars"
-#     cat << EOF > ../../.envvars
-# tenant_id="${tenant_id}"
-# subscription_id="${subscription_id}"
-# resource_group_name=${resource_group_name}
-# storage_account_name=${storage_account_name}
-# container_name=statefiles
 
-# EOF
-#     echo "INFO - Do not forget to check-in ../.envvars to source code management"
   fi
 else
   terragrunt apply -var-file=deploy.tfvars

@@ -1,1 +1,0 @@
-terragrunt apply -var-file=deploy.tfvars
