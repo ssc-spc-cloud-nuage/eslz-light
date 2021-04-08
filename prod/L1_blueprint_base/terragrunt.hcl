@@ -1,5 +1,5 @@
 locals {
-  rscfg = yamldecode(file("../env.yaml"))
+  rscfg = yamldecode(file("/tf/caf/prod/prod.yaml"))
 }
 
 remote_state {

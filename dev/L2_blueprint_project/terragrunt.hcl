@@ -21,12 +21,12 @@ remote_state {
     storage_account_name = local.rscfg.remote_state.storage_account_name
     container_name       = local.rscfg.remote_state.container_name
 
-    key = "L1_blueprint_base/terraform.tfstate"
+    key = "L2_blueprint_project/terraform.tfstate"
   }
 }
 
 terraform {
-  source = "/tf/caf/modules/L1_blueprint_base"
+  source = "/tf/caf/modules/L2_blueprint_project"
 
   extra_arguments "force_subscription" {
     commands = [

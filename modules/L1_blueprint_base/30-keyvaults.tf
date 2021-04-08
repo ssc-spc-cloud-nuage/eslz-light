@@ -1,25 +1,3 @@
-/*
-locals {
-  azurecaf_naming_convention-Project-kv-16     = substr("${local.env_short}CKV-${local.group_short}-${local.project_short}", 0, 16)
-  azurecaf_naming_convention-Project-kv-21     = substr("${local.azurecaf_naming_convention-Project-kv-16}-${local.unique_Keyvault}", 0, 21)
-  azurecaf_naming_convention-Project-kv-result = "${local.azurecaf_naming_convention-Project-kv-21}-kv"
-}
-
-//Can't have a "_" in the name, only "-"
-resource "azurerm_key_vault" "Project-kv" {
-  # name                            = azurecaf_naming_convention.Project-kv.result
-  name                            = local.azurecaf_naming_convention-Project-kv-result
-  location                        = local.resource_groups_L1.Keyvault.location
-  resource_group_name             = local.resource_groups_L1.Keyvault.name
-  sku_name                        = "standard"
-  tenant_id                       = data.azurerm_client_config.current.tenant_id
-  enabled_for_deployment          = true
-  enabled_for_disk_encryption     = true
-  enabled_for_template_deployment = true
-  tags                            = var.tags
-}
-*/
-
 module Project-kv {
   source            = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-keyvault?ref=v2.1.1"
   env               = var.env

@@ -1,6 +1,3 @@
-# Can't use azurecaf_naming_convention for now due to casing bug https://github.com/aztfmod/terraform-provider-azurecaf/issues/25
-# Will use when bug is fixed
-
 module "Project-law" {
   source            = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-log_analytics_workspace?ref=v1.0.2"
   userDefinedString = "${var.group}_${var.project}"
