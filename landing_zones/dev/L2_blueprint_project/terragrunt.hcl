@@ -31,13 +31,13 @@ dependencies {
 }
 
 dependency "L1_blueprint_base" {
-  config_path  = "../L1_blueprint_base"
+  config_path = "../L1_blueprint_base"
 
   # Configure mock outputs for the `validate` command when there are no outputs available
   # This can happen if the dependency hasn't been applied yet
   mock_outputs_allowed_terraform_commands = ["validate"]
   mock_outputs = {
-    prod_organizational_unit_id  = ""
+    prod_organizational_unit_id = ""
   }
 }
 
@@ -74,15 +74,15 @@ inputs = {
   # L1_terraform_remote_state_container_name      = local.rscfg.remote_state.container_name
   # L1_terraform_remote_state_key                 = "L1_blueprint_base/terraform.tfstate"
   # L1_terraform_remote_state_resource_group_name = local.rscfg.remote_state.resource_group_name
-  L1_blueprint_base_outputs                     = dependency.L1_blueprint_base.outputs
-  domain                                        = local.config.common.domain
-  env                                           = local.config.common.env
-  group                                         = local.config.common.group
-  Landing-Zone-Next-Hop                         = local.config.common.Landing-Zone-Next-Hop
-  location                                      = local.config.common.location
-  project                                       = local.config.common.project
-  tags                                          = local.config.common.tags
-  RDS-Gateways                                  = local.config.L2_blueprint_project.RDS-Gateways
-  L2_RBAC                                       = local.config.L2_blueprint_project.L2_RBAC
-  windows_VMs                                   = local.config.L2_blueprint_project.windows_VMs
+  L1_blueprint_base_outputs = dependency.L1_blueprint_base.outputs
+  domain                    = local.config.common.domain
+  env                       = local.config.common.env
+  group                     = local.config.common.group
+  Landing-Zone-Next-Hop     = local.config.common.Landing-Zone-Next-Hop
+  location                  = local.config.common.location
+  project                   = local.config.common.project
+  tags                      = local.config.common.tags
+  RDS-Gateways              = local.config.L2_blueprint_project.RDS-Gateways
+  L2_RBAC                   = local.config.L2_blueprint_project.L2_RBAC
+  windows_VMs               = local.config.L2_blueprint_project.windows_VMs
 }

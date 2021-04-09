@@ -7,3 +7,5 @@
 ```bash
 /tf/caf/scripts/bootstrap.sh
 ```
+
+Once bootstrapped use the standard terragrunt commands to manage blueprint.

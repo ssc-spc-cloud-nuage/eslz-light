@@ -1,24 +1,3 @@
-
-# output aad_apps {
-#   sensitive = true
-#   value     = module.L0_Launchpad.aad_apps
-# }
-
-# output global_settings {
-#   sensitive = true
-#   value     = module.L0_Launchpad.global_settings
-# }
-
-# output launchpad_resource_group {
-#   sensitive = false
-#   value     = module.launchpad_resource_group
-# }
-
-# output launchpad_storage_account {
-#   sensitive = false
-#   value     = module.launchpad_storage_account
-# }
-
 output "tenant_id" {
   value = data.azurerm_client_config.current.tenant_id
 }

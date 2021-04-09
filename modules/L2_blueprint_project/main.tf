@@ -3,12 +3,12 @@ terraform {
     azurerm = {
       # https://github.com/terraform-providers/terraform-provider-azurerm
       source  = "hashicorp/azurerm"
-      version = "~> 2.46.1"
+      version = "~> 2.54.0"
     }
     azuread = {
       # https://github.com/hashicorp/terraform-provider-azuread
       source  = "hashicorp/azuread"
-      version = "~> 1.3.0"
+      version = "~> 1.4.0"
     }
   }
   required_version = ">= 0.14"
